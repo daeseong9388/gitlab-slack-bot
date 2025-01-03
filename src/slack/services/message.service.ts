@@ -20,6 +20,7 @@ export class MessageService {
       blocks: [
         this.createHeaderBlock(headerText),
         this.createMergeRequestBlock(notification),
+        this.createFooterBlock(notification),
         this.createDividerBlock(),
       ],
     };
@@ -96,6 +97,41 @@ export class MessageService {
   private createDividerBlock(): KnownBlock {
     return {
       type: 'divider',
+    };
+  }
+
+  private createFooterBlock(notification: ReviewNotification): KnownBlock {
+    const { type, userId, noteUrl } = notification;
+    const reviewerMention = getSlackMention(userId);
+
+    let footerText = '';
+    switch (type) {
+      case REVIEW_TYPES.REQUEST:
+        footerText = `${reviewerMention}님이 리뷰를 요청했습니다`;
+        break;
+      case REVIEW_TYPES.START:
+        footerText = `${reviewerMention}님이 리뷰를 시작했습니다`;
+        break;
+      case REVIEW_TYPES.COMPLETE:
+        footerText = `${reviewerMention}님이 리뷰를 완료했습니다`;
+        break;
+      case REVIEW_TYPES.RESPONSE:
+        footerText = `${reviewerMention}님이 리뷰에 응답했습니다`;
+        break;
+      case REVIEW_TYPES.ADDITIONAL:
+        footerText = `${reviewerMention}님이 추가 리뷰를 요청했습니다`;
+        break;
+      default:
+        footerText = `${reviewerMention}님이 코멘트를 남겼습니다`;
+    }
+    return {
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: `👤 ${footerText} • <${noteUrl}|코멘트 보기>`,
+        },
+      ],
     };
   }
 }
