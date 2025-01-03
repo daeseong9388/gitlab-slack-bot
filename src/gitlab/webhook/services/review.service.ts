@@ -40,7 +40,10 @@ export class ReviewService {
     try {
       // Send Slack notification
       if (triggerType !== REVIEW_TYPES.AI_REVIEW) {
-        const notification = this.createReviewNotification(triggerType, payload);
+        const notification = this.createReviewNotification(
+          triggerType,
+          payload,
+        );
         await this.notificationService.sendReviewNotification(notification);
       }
 

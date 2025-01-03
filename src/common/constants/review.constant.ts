@@ -16,4 +16,4 @@ export const REVIEW_HEADERS = {
   [REVIEW_TYPES.AI_REVIEW]: '🤖 *AI 리뷰*',
 } as const;
 
-export type ReviewType = typeof REVIEW_TYPES[keyof typeof REVIEW_TYPES];
+export type ReviewType = (typeof REVIEW_TYPES)[keyof typeof REVIEW_TYPES];

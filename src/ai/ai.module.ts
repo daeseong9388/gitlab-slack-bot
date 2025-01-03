@@ -5,10 +5,7 @@ import { AnthropicProvider } from './providers/anthropic.provider';
 import { GitLabApiModule } from '../gitlab/api/gitlab-api.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    GitLabApiModule,
-  ],
+  imports: [ConfigModule, GitLabApiModule],
   providers: [
     AIReviewService,
     {

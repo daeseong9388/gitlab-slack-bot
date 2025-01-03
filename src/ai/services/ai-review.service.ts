@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AIReviewContext, AIReviewResult } from '../interfaces/ai-engine.interface';
+import {
+  AIReviewContext,
+  AIReviewResult,
+} from '../interfaces/ai-engine.interface';
 import { GitLabApiService } from '@/gitlab/api/gitlab-api.service';
 import { AnthropicProvider } from '../providers/anthropic.provider';
 
@@ -63,8 +66,13 @@ export class AIReviewService {
   private formatChanges(changes: any[]): string {
     return changes
       .map((change) => {
-        const diffHeader = `File: ${change.new_path} (${change.new_file ? 'new file' : 
-          change.deleted_file ? 'deleted' : 'modified'})`;
+        const diffHeader = `File: ${change.new_path} (${
+          change.new_file
+            ? 'new file'
+            : change.deleted_file
+              ? 'deleted'
+              : 'modified'
+        })`;
         return `${diffHeader}\n${change.diff}`;
       })
       .join('\n\n');
@@ -78,17 +86,17 @@ export class AIReviewService {
       review.summary,
       '',
       '### 잘된 점 ✨',
-      ...review.highlights.map(highlight => `- ${highlight}`),
+      ...review.highlights.map((highlight) => `- ${highlight}`),
       '',
       '### 개선 제안 💡',
-      ...review.suggestions.map(suggestion => `- ${suggestion}`),
+      ...review.suggestions.map((suggestion) => `- ${suggestion}`),
       '',
     ];
 
     if (review.risks.length > 0) {
       comment.push(
         '### 주의 사항 ⚠️',
-        ...review.risks.map(risk => `- ${risk}`),
+        ...review.risks.map((risk) => `- ${risk}`),
         '',
       );
     }

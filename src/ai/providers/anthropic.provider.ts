@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import AnthropicClient from '@anthropic-ai/sdk';
 import {
   MessageCreateParamsNonStreaming,
-  TextBlock
+  TextBlock,
 } from '@anthropic-ai/sdk/resources/messages.mjs';
 import { tokenCount } from '../utils/token-count';
 import {
@@ -27,7 +27,9 @@ export class AnthropicProvider implements AIEngine {
 
     this.config = {
       apiKey,
-      model: this.configService.get<string>('CLAUDE_MODEL') || 'claude-3-5-sonnet-20241022',
+      model:
+        this.configService.get<string>('CLAUDE_MODEL') ||
+        'claude-3-5-sonnet-20241022',
       maxTokensOutput: 4000,
       maxTokensInput: 100000,
     };
@@ -41,8 +43,12 @@ export class AnthropicProvider implements AIEngine {
       const userMessage = this.buildUserMessage(context);
 
       // Calculate tokens
-      const requestTokens = tokenCount(systemMessage) + tokenCount(userMessage) + 8;
-      if (requestTokens > this.config.maxTokensInput - this.config.maxTokensOutput) {
+      const requestTokens =
+        tokenCount(systemMessage) + tokenCount(userMessage) + 8;
+      if (
+        requestTokens >
+        this.config.maxTokensInput - this.config.maxTokensOutput
+      ) {
         throw new Error('Review request exceeds maximum token limit');
       }
 
@@ -59,7 +65,9 @@ export class AnthropicProvider implements AIEngine {
         max_tokens: this.config.maxTokensOutput,
       };
 
-      const response = await this.client.messages.create(params) satisfies TextBlock;
+      const response = (await this.client.messages.create(
+        params,
+      )) satisfies TextBlock;
       return this.parseResponse(response.content[0].text);
     } catch (error) {
       this.logger.error('Failed to generate review with Claude', error);

@@ -56,24 +56,26 @@ export class GitLabApiService {
     }
 
     let proxyConfig = undefined;
-    
+
     if (fixieUrl) {
       try {
         const parsedUrl = new URL(fixieUrl);
-        const [username, password] = (parsedUrl.username && parsedUrl.password) 
-          ? [parsedUrl.username, parsedUrl.password] 
-          : [];
+        const [username, password] =
+          parsedUrl.username && parsedUrl.password
+            ? [parsedUrl.username, parsedUrl.password]
+            : [];
 
         proxyConfig = {
           protocol: 'http',
           host: parsedUrl.hostname,
           port: parseInt(parsedUrl.port, 10) || 80,
-          ...(username && password && {
-            auth: {
-              username: decodeURIComponent(username),
-              password: decodeURIComponent(password)
-            }
-          })
+          ...(username &&
+            password && {
+              auth: {
+                username: decodeURIComponent(username),
+                password: decodeURIComponent(password),
+              },
+            }),
         };
       } catch (error) {
         this.logger.warn('Failed to parse FIXIE_URL', error);
@@ -85,7 +87,7 @@ export class GitLabApiService {
       headers: {
         'PRIVATE-TOKEN': token,
       },
-      ...(proxyConfig && { proxy: proxyConfig })
+      ...(proxyConfig && { proxy: proxyConfig }),
     });
   }
 

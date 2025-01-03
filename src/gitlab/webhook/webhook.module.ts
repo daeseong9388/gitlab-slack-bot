@@ -8,16 +8,8 @@ import { SlackModule } from '@/slack/slack.module';
 import { AIModule } from '@/ai/ai.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    SlackModule,
-    AIModule,
-  ],
+  imports: [ConfigModule, SlackModule, AIModule],
   controllers: [WebhookController],
-  providers: [
-    WebhookService,
-    ReviewService,
-    NotificationService,
-  ],
+  providers: [WebhookService, ReviewService, NotificationService],
 })
 export class WebhookModule {}
