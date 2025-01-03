@@ -6,5 +6,5 @@ export const GITLAB_USERS: Record<string, string> = {
 };
 
 export const getSlackMention = (userId: string | number) => {
-  return `@${GITLAB_USERS[userId] ?? GITLAB_USERS['27']}`;
+  return `<@${GITLAB_USERS[userId] ?? GITLAB_USERS['27']}>`;
 };
