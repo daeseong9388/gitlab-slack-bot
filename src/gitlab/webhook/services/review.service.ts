@@ -139,9 +139,9 @@ export class ReviewService {
             object_attributes.discussion_id,
           );
 
-        if (discussion.notes.length > 0) {
+        if (discussion.notes.length > 1) {
           const originalNote = discussion.notes[0];
-          const lastNote = discussion.notes[discussion.notes.length - 1];
+          const lastNote = discussion.notes.at(-2);
 
           notification.discussion = {
             id: discussion.id,
