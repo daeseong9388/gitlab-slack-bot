@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ReviewNotification } from '@/gitlab/webhook/types/gitlab.type';
+import {
+  MergeNotification,
+  ReviewNotification,
+} from '@/gitlab/webhook/types/gitlab.type';
 import { KnownBlock } from '@slack/web-api';
 import { getSlackMention } from '../constants/slack.constant';
 import {
@@ -150,6 +153,33 @@ export class MessageService {
           type: 'mrkdwn',
           text: `👤 ${footerText} • <${noteUrl}|코멘트 보기>`,
         },
+      ],
+    };
+  }
+
+  createMergeMessage(notification: MergeNotification): {
+    text: string;
+    blocks: KnownBlock[];
+  } {
+    const { mergeRequest } = notification;
+    const userMention = getSlackMention(notification.userId);
+    const headerText = `🎉 머지 완료 - ${userMention}님이 머지했습니다`;
+
+    return {
+      text: headerText,
+      blocks: [
+        this.createHeaderBlock(headerText),
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: [
+              `*제목:* <${mergeRequest.url}|${mergeRequest.title}>`,
+              `*브랜치:* \`${mergeRequest.sourceBranch}\` → \`${mergeRequest.targetBranch}\``,
+            ].join('\n'),
+          },
+        },
+        this.createDividerBlock(),
       ],
     };
   }

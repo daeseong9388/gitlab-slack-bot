@@ -17,11 +17,7 @@ export class AIReviewService {
     private readonly aiProvider: AnthropicProvider,
   ) {}
 
-  async processReviewRequest(
-    projectId: number,
-    mergeRequestIid: number,
-    trigger: string,
-  ) {
+  async processReviewRequest(projectId: number, mergeRequestIid: number) {
     try {
       // 1. MR의 변경사항 가져오기
       const changes = await this.gitlabApiService.getMergeRequestChanges(

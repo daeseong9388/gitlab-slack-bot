@@ -1,8 +1,12 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GitLabNoteHook } from '../interfaces/gitlab-webhook.interface';
+import {
+  GitLabNoteHook,
+  GitLabMergeRequestHook,
+} from '../interfaces/gitlab-webhook.interface';
 import { GITLAB_EVENT_TYPES } from '../constants/gitlab.constant';
 import { ReviewService } from './review.service';
+import { MergeRequestService } from './merge-request.service';
 
 @Injectable()
 export class WebhookService {
@@ -11,6 +15,7 @@ export class WebhookService {
   constructor(
     private readonly configService: ConfigService,
     private readonly reviewService: ReviewService,
+    private readonly mergeRequestService: MergeRequestService,
   ) {}
 
   async verifySecret(token: string): Promise<void> {
@@ -21,11 +26,20 @@ export class WebhookService {
     }
   }
 
-  async processWebhook(eventType: string, payload: GitLabNoteHook) {
+  async processWebhook(
+    eventType: string,
+    payload: GitLabNoteHook | GitLabMergeRequestHook,
+  ) {
     this.logger.log(`Processing webhook: ${eventType}`);
 
     if (eventType === GITLAB_EVENT_TYPES.NOTE) {
-      return this.reviewService.processNote(payload);
+      return this.reviewService.processNote(payload as GitLabNoteHook);
+    }
+
+    if (eventType === GITLAB_EVENT_TYPES.MERGE_REQUEST) {
+      return this.mergeRequestService.processMergeRequest(
+        payload as GitLabMergeRequestHook,
+      );
     }
 
     this.logger.warn(`Unhandled GitLab event type: ${eventType}`);

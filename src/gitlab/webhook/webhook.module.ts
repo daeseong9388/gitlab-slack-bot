@@ -7,10 +7,16 @@ import { NotificationService } from './services/notification.service';
 import { SlackModule } from '@/slack/slack.module';
 import { AIModule } from '@/ai/ai.module';
 import { GitLabApiModule } from '../api/gitlab-api.module';
+import { MergeRequestService } from './services/merge-request.service';
 
 @Module({
   imports: [ConfigModule, SlackModule, AIModule, GitLabApiModule],
   controllers: [WebhookController],
-  providers: [WebhookService, ReviewService, NotificationService],
+  providers: [
+    WebhookService,
+    ReviewService,
+    NotificationService,
+    MergeRequestService,
+  ],
 })
 export class WebhookModule {}

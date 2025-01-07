@@ -54,7 +54,6 @@ export class ReviewService {
         await this.aiReviewService.processReviewRequest(
           project.id,
           merge_request.iid,
-          object_attributes.note,
         );
       }
 

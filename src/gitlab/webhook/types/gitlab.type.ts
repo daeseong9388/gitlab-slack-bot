@@ -30,3 +30,21 @@ export interface ReviewNotification {
     };
   };
 }
+
+export interface MergeNotification {
+  type: 'merge';
+  username: string;
+  userId: number;
+  project: string;
+  mergeRequest: {
+    title: string;
+    url: string;
+    sourceBranch: string;
+    targetBranch: string;
+    description: string;
+  };
+  reviewers?: Array<{
+    id: number;
+    name: string;
+  }>;
+}

@@ -114,3 +114,37 @@ export interface GitLabNoteHook {
   repository: GitLabRepository;
   merge_request?: GitLabMergeRequest;
 }
+
+export interface GitLabMergeRequestHook {
+  object_kind: 'merge_request';
+  event_type: 'merge_request';
+  user: {
+    id: number;
+    name: string;
+    username: string;
+    avatar_url: string;
+  };
+  project: {
+    id: number;
+    name: string;
+    description: string;
+    web_url: string;
+    path_with_namespace: string;
+  };
+  object_attributes: GitLabMergeRequest & {
+    action:
+      | 'merge'
+      | 'open'
+      | 'close'
+      | 'reopen'
+      | 'update'
+      | 'approved'
+      | 'unapproved';
+  };
+  reviewers?: {
+    id: number;
+    name: string;
+    username: string;
+    avatar_url: string;
+  }[];
+}

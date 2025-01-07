@@ -1,5 +1,6 @@
 export const GITLAB_EVENT_TYPES = {
   NOTE: 'Note Hook',
+  MERGE_REQUEST: 'Merge Request Hook',
 } as const;
 
 export const REVIEW_TRIGGERS = {
