@@ -8,6 +8,7 @@ import { ReviewNotification, ReviewType } from '../types/gitlab.type';
 import { NotificationService } from './notification.service';
 import { REVIEW_TRIGGERS } from '../constants/gitlab.constant';
 import { AIReviewService } from '@/ai/services/ai-review.service';
+import { GitLabApiService } from '../../api/gitlab-api.service'; // Add this line
 
 @Injectable()
 export class ReviewService {
@@ -16,6 +17,7 @@ export class ReviewService {
   constructor(
     private readonly notificationService: NotificationService,
     private readonly aiReviewService: AIReviewService,
+    private readonly gitlabApiService: GitLabApiService, // Add this line
   ) {}
 
   async processNote(payload: GitLabNoteHook) {
@@ -40,7 +42,7 @@ export class ReviewService {
     try {
       // Send Slack notification
       if (triggerType !== REVIEW_TYPES.AI_REVIEW) {
-        const notification = this.createReviewNotification(
+        const notification = await this.createReviewNotification(
           triggerType,
           payload,
         );
@@ -103,31 +105,22 @@ export class ReviewService {
     return null;
   }
 
-  private createReviewNotification(
+  private async createReviewNotification(
     type: ReviewType,
     payload: GitLabNoteHook,
-  ): ReviewNotification {
+  ): Promise<ReviewNotification> {
     const { user, project, object_attributes, merge_request } = payload;
 
-    if (!merge_request) {
-      throw new Error(
-        'Merge request data is required for review notifications',
-      );
-    }
-
-    // GitLab API에서는 author 정보가 last_commit.author에 있음
-    const authorName = merge_request.last_commit?.author?.name || user.name;
-
-    return {
+    const notification: ReviewNotification = {
       type,
-      username: user.name,
+      username: user.username,
       userId: user.id,
-      project: project.name,
+      project: project.path_with_namespace,
       mergeRequest: {
         title: merge_request.title,
         url: merge_request.url,
         authorId: merge_request.author_id,
-        author: authorName,
+        author: merge_request.author?.name || 'Unknown',
         sourceBranch: merge_request.source_branch,
         targetBranch: merge_request.target_branch,
         state: merge_request.state,
@@ -135,5 +128,38 @@ export class ReviewService {
       note: object_attributes.note,
       noteUrl: object_attributes.url,
     };
+
+    // Add discussion information only for review responses
+    if (type === REVIEW_TYPES.RESPONSE && object_attributes.discussion_id) {
+      try {
+        const discussion =
+          await this.gitlabApiService.getMergeRequestDiscussion(
+            project.id,
+            merge_request.iid,
+            object_attributes.discussion_id,
+          );
+
+        if (discussion.notes.length > 0) {
+          const originalNote = discussion.notes[0];
+          const lastNote = discussion.notes[discussion.notes.length - 1];
+
+          notification.discussion = {
+            id: discussion.id,
+            originalAuthor: {
+              id: originalNote.author.id,
+              name: originalNote.author.name,
+            },
+            lastReplyAuthor: {
+              id: lastNote.author.id,
+              name: lastNote.author.name,
+            },
+          };
+        }
+      } catch (error) {
+        this.logger.error('Failed to fetch discussion details', error);
+      }
+    }
+
+    return notification;
   }
 }

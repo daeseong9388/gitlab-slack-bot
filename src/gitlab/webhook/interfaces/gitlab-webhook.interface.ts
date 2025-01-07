@@ -94,6 +94,7 @@ export interface GitLabMergeRequest {
   human_time_estimate: string | null;
   human_total_time_spent: string | null;
   human_time_change: string | null;
+  author: { name: string; email: string };
 }
 
 export interface GitLabRepository {

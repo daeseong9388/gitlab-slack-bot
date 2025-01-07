@@ -18,4 +18,15 @@ export interface ReviewNotification {
   };
   note: string;
   noteUrl: string;
+  discussion?: {
+    id: string;
+    originalAuthor: {
+      id: number;
+      name: string;
+    };
+    lastReplyAuthor: {
+      id: number;
+      name: string;
+    };
+  };
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ReviewNotification } from '@/gitlab/webhook/types/gitlab.type';
 import { KnownBlock } from '@slack/web-api';
-import { getSlackMention, GITLAB_USERS } from '../constants/slack.constant';
+import { getSlackMention } from '../constants/slack.constant';
 import {
   REVIEW_TYPES,
   REVIEW_HEADERS,
@@ -33,7 +33,7 @@ export class MessageService {
     const isAuthor = userId === mergeRequest.authorId;
     const headerText = REVIEW_HEADERS[type];
 
-    let actionText = '';
+    let actionText: string;
     switch (type) {
       case REVIEW_TYPES.REQUEST:
         actionText = `${headerText} - ${authorMention}님이 요청`;
@@ -45,9 +45,28 @@ export class MessageService {
         actionText = `${headerText} - ${reviewerMention}님이 ${authorMention}님의 MR 검토`;
         break;
       case REVIEW_TYPES.RESPONSE:
-        actionText = isAuthor
+        let responseText = isAuthor
           ? `${headerText} - ${authorMention}님이 응답`
           : `${headerText} - ${reviewerMention}님이 ${authorMention}님의 MR에 응답`;
+
+        // Add discussion context for responses
+        if (notification.discussion) {
+          const threadAuthorMention = getSlackMention(
+            notification.discussion.originalAuthor.id,
+          );
+          const lastReplyAuthorMention = getSlackMention(
+            notification.discussion.lastReplyAuthor.id,
+          );
+
+          responseText += ` in 📝 ${threadAuthorMention}님의 쓰레드`;
+          if (
+            notification.discussion.lastReplyAuthor.id !==
+            notification.discussion.originalAuthor.id
+          ) {
+            responseText += ` (마지막 답변: ${lastReplyAuthorMention})`;
+          }
+        }
+        actionText = responseText;
         break;
       case REVIEW_TYPES.ADDITIONAL:
         actionText = `${headerText} - ${authorMention}님이 요청`;
@@ -104,7 +123,7 @@ export class MessageService {
     const { type, userId, noteUrl } = notification;
     const reviewerMention = getSlackMention(userId);
 
-    let footerText = '';
+    let footerText: string;
     switch (type) {
       case REVIEW_TYPES.REQUEST:
         footerText = `${reviewerMention}님이 리뷰를 요청했습니다`;

@@ -41,6 +41,32 @@ export interface CreateGitLabMRNoteRequest {
   body: string;
 }
 
+export interface GitLabUser {
+  id: number;
+  name: string;
+  username: string;
+  avatar_url: string;
+  email: string;
+}
+
+export interface GitLabDiscussion {
+  id: string;
+  individual_note: boolean;
+  notes: GitLabDiscussionNote[];
+}
+
+export interface GitLabDiscussionNote {
+  id: number;
+  type: string | null;
+  body: string;
+  author: GitLabUser;
+  created_at: string;
+  updated_at: string;
+  resolved: boolean;
+  resolvable: boolean;
+  resolved_by: GitLabUser | null;
+}
+
 @Injectable()
 export class GitLabApiService {
   private readonly logger = new Logger(GitLabApiService.name);
@@ -231,6 +257,26 @@ export class GitLabApiService {
     } catch (error) {
       this.logger.error(
         `Failed to get note ${noteId} for MR ${mergeRequestIid} in project ${projectId}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async getMergeRequestDiscussion(
+    projectId: number | string,
+    mergeRequestIid: number,
+    discussionId: string,
+  ): Promise<GitLabDiscussion> {
+    try {
+      const { data } = await this.client.get<GitLabDiscussion>(
+        `/projects/${projectId}/merge_requests/${mergeRequestIid}/discussions/${discussionId}`,
+      );
+
+      return data;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get discussion ${discussionId} for MR ${mergeRequestIid} in project ${projectId}`,
         error,
       );
       throw error;
